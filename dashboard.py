@@ -4,8 +4,10 @@ import dash_html_components as html
 from dash.dependencies import Input, Output
 import plotly.express as px
 import pandas as pd
+import os
 
-port = 4000
+
+port = os.environ.get('PORT')
 
 # Exemple de données
 df = pd.DataFrame({
