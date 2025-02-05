@@ -5,6 +5,8 @@ from dash.dependencies import Input, Output
 import plotly.express as px
 import pandas as pd
 
+port = 4000
+
 # Exemple de données
 df = pd.DataFrame({
     "Fruit": ["Pommes", "Oranges", "Bananes", "Pommes", "Oranges", "Bananes"],
