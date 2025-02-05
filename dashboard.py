@@ -1,42 +1,36 @@
-import streamlit as st
+import dash
+import dash_core_components as dcc
+import dash_html_components as html
+from dash.dependencies import Input, Output
+import plotly.express as px
 import pandas as pd
-import matplotlib.pyplot as plt
 
-# Title of the dashboard
-st.title("Basic Interactive Dashboard")
+# Exemple de données
+df = pd.DataFrame({
+    "Fruit": ["Pommes", "Oranges", "Bananes", "Pommes", "Oranges", "Bananes"],
+    "Quantité": [4, 1, 2, 2, 4, 5],
+    "Ville": ["SF", "SF", "SF", "NYC", "NYC", "NYC"]
+})
 
-# Load some data
-@st.cache_data
-def load_data():
-    data = pd.DataFrame({
-        'x': range(1, 101),
-        'y': [i**2 for i in range(1, 101)]
-    })
-    return data
+app = dash.Dash(__name__)
 
-data = load_data()
+app.layout = html.Div([
+    dcc.Graph(id='graph'),
+    dcc.Dropdown(
+        id='dropdown',
+        options=[{'label': i, 'value': i} for i in df['Ville'].unique()],
+        value='SF'
+    )
+])
 
-# Display the data
-st.write("Here's the dataset:")
-st.write(data)
+@app.callback(
+    Output('graph', 'figure'),
+    [Input('dropdown', 'value')]
+)
+def update_graph(selected_city):
+    filtered_df = df[df['Ville'] == selected_city]
+    fig = px.bar(filtered_df, x="Fruit", y="Quantité", color="Fruit", barmode="group")
+    return fig
 
-# Add a slider for interactive filtering
-st.sidebar.header("Filter Data")
-x_min = st.sidebar.slider("Minimum X value", min_value=int(data['x'].min()), max_value=int(data['x'].max()), value=int(data['x'].min()))
-x_max = st.sidebar.slider("Maximum X value", min_value=int(data['x'].min()), max_value=int(data['x'].max()), value=int(data['x'].max()))
-
-# Filter the data based on the slider values
-filtered_data = data[(data['x'] >= x_min) & (data['x'] <= x_max)]
-
-# Display the filtered data
-st.write(f"Filtered Data (X between {x_min} and {x_max}):")
-st.write(filtered_data)
-
-# Plot the filtered data
-st.write("Plot of Filtered Data:")
-fig, ax = plt.subplots()
-ax.plot(filtered_data['x'], filtered_data['y'], marker='o')
-ax.set_xlabel("X")
-ax.set_ylabel("Y")
-ax.set_title("X vs Y")
-st.pyplot(fig)
+if __name__ == '__main__':
+    app.run_server(debug=True)
